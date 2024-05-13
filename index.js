@@ -72,17 +72,11 @@ function extractItems(obj, results = []) {
         if (obj.id && obj.media?.metadata?.title) {
             results.push(`ID: ${obj.id}, Titel: ${obj.media.metadata.title}`);
             console.log("ID: " + obj.id + " Name: " + obj.media.metadata.title);
-
-            if(process.env.codec === "copy") { 
-              axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&codec=${CODEC}`)
-            } else { 
-              axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&bitrate=${BITRATE}&codec=${CODEC}`)
-            }
-        
+            axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&codec=${CODEC}`)
             .then(response2 => {
             })
             .catch(error2 => {
-              console.error('Error during conversion:', error2);
+              console.error('Fehler beim konvertieren:', error2);
             });
         }
         Object.values(obj).forEach(value => extractItems(value, results));
