@@ -7,6 +7,7 @@ var LIBRARY_ID;
 var CRON_SETTING;
 var TOKEN;
 var BITRATE;
+var CODEC;
 
 if(process.env.TZ) { 
   console.log('Timezone is set to: ' + process.env.TZ); 
@@ -52,8 +53,15 @@ if(process.env.BITRATE) {
   console.log('Bitrate for conversion ist set to: ' + process.env.BITRATE);
   BITRATE = process.env.BITRATE;
 } else { 
-  BITRATE = "128k";
-  console.log('Bitrate for conversion ist set to default 128k');
+  BITRATE = "";
+  console.log('Bitrate is empty for faster conversion when copying');
+}
+if(process.env.CODEC) { 
+  console.log('Codec for conversion ist set to: ' + process.env.CODEC);
+  CODEC = process.env.CODEC;
+} else { 
+  CODEC = "copy";
+  console.log('Codec for conversion ist set to default - copy');
 }
 const url = DOMAIN + '/api/libraries/' + LIBRARY_ID + '/items?limit=' + MAX_PARALLEL_CONVERSIONS + '&page=0&filter=tracks.bXVsdGk%3D';
 const headers = { Authorization: 'Bearer ' + TOKEN };
@@ -64,11 +72,17 @@ function extractItems(obj, results = []) {
         if (obj.id && obj.media?.metadata?.title) {
             results.push(`ID: ${obj.id}, Titel: ${obj.media.metadata.title}`);
             console.log("ID: " + obj.id + " Name: " + obj.media.metadata.title);
-            axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&bitrate=${BITRATE}`)
+
+            if(process.env.codec === "copy") { 
+              axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&codec=${CODEC}`)
+            } else { 
+              axios.post(`${DOMAIN}/api/tools/item/${obj.id}/encode-m4b?token=${TOKEN}&bitrate=${BITRATE}&codec=${CODEC}`)
+            }
+        
             .then(response2 => {
             })
             .catch(error2 => {
-              console.error('Fehler beim konvertieren:', error2);
+              console.error('Error during conversion:', error2);
             });
         }
         Object.values(obj).forEach(value => extractItems(value, results));
